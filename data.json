@@ -1,0 +1,155 @@
+{
+  "assets": {
+    "crypto": [
+      {
+        "name": "solana",
+        "coingecko_id": "solana",
+        "quantity": 13.0716,
+        "buy_price_usd": 105,
+        "id": "aab2b5e8-c50b-4148-b17a-e0233e547de5"
+      },
+      {
+        "name": "Ethereum",
+        "coingecko_id": "ethereum",
+        "quantity": 0.08281,
+        "buy_price_usd": 2306.7,
+        "id": "27deae92-d56e-4c7b-be0a-8634060437ce"
+      },
+      {
+        "name": "Bitcoin",
+        "coingecko_id": "bitcoin",
+        "quantity": 0.00141088,
+        "buy_price_usd": 74300.51,
+        "id": "3558f34c-f826-466b-af34-d8fbc123afa7"
+      },
+      {
+        "name": "XRP",
+        "coingecko_id": "ripple",
+        "quantity": 69.05,
+        "buy_price_usd": 1.79,
+        "id": "7ef00dd0-1524-4d06-9d11-1d8213c5490f"
+      },
+      {
+        "name": "polygon",
+        "coingecko_id": "matic-network",
+        "quantity": 507.9,
+        "buy_price_usd": 0.099,
+        "id": "5637e45d-22b3-4f1e-9cff-3ff6882cbd26"
+      },
+      {
+        "name": "chainlink",
+        "coingecko_id": "link",
+        "quantity": 2.7,
+        "buy_price_usd": 9.28,
+        "id": "bf7c0ee6-96ed-4af7-b169-3df16e8ad9e5"
+      }
+    ],
+    "indian_stocks": [
+      {
+        "name": "tata gold etf",
+        "symbol": "TATAGOLD",
+        "exchange": "NSE",
+        "quantity": 2326,
+        "buy_price_inr": 16.36,
+        "id": "60cc4138-b367-4ab2-a04f-35c8a998d723"
+      }
+    ],
+    "us_stocks": [
+      {
+        "name": "global x uranium etf",
+        "symbol": "URA",
+        "quantity": 3.491861,
+        "buy_price_usd": 47.92,
+        "id": "ee86d7d2-e694-4f67-9719-fc5a86d8aa61"
+      },
+      {
+        "name": "nvidia corporation",
+        "symbol": "NVDA",
+        "quantity": 0.017014,
+        "buy_price_usd": 176.32,
+        "id": "87903a81-a6db-4e3b-95ca-a286fb4ad8c6"
+      }
+    ],
+    "mutual_funds": [],
+    "bank_accounts": [],
+    "gold": [
+      {
+        "name": "personal",
+        "quantity_grams": 2.5,
+        "current_value": 40000,
+        "id": "d1db27e5-c352-4830-9f18-43289b0e2ecf"
+      }
+    ],
+    "property": [],
+    "other": []
+  },
+  "liabilities": {
+    "loans": [
+      {
+        "name": "axis bank personal",
+        "original_amount": 120000,
+        "outstanding": 44000,
+        "interest_rate": 21,
+        "emi": 11668,
+        "id": "12521f63-a2c0-450a-ad39-6f04affeac78"
+      },
+      {
+        "name": "moneyview",
+        "original_amount": 85000,
+        "outstanding": 68920,
+        "interest_rate": 24,
+        "emi": 6829,
+        "id": "12b63344-b58a-4906-bf40-bf4c0d082884"
+      },
+      {
+        "name": "smfg",
+        "original_amount": 100000,
+        "outstanding": 120000,
+        "interest_rate": 24,
+        "emi": 6789,
+        "id": "88198d8a-4dcb-4dd5-8d06-0b501797a7f5"
+      },
+      {
+        "name": "education",
+        "original_amount": 180000,
+        "outstanding": 90000,
+        "interest_rate": 10,
+        "emi": 2400,
+        "id": "01957be1-e58d-4320-9567-ea5423c423d1"
+      },
+      {
+        "name": "slice",
+        "original_amount": 15000,
+        "outstanding": 15000,
+        "interest_rate": 12,
+        "emi": 2000,
+        "id": "a64fbbeb-f73c-43c3-9799-e18383b04a76"
+      },
+      {
+        "name": "card",
+        "original_amount": 9500,
+        "outstanding": 9500,
+        "interest_rate": 0,
+        "emi": 9500,
+        "id": "942921b2-9420-4e98-a602-5d5ff5bd011e"
+      },
+      {
+        "name": "gold",
+        "original_amount": 320000,
+        "outstanding": 320000,
+        "interest_rate": 10,
+        "emi": 0,
+        "id": "927515d0-41cf-4e08-bea3-9103ed9a3bb0"
+      }
+    ],
+    "other": []
+  },
+  "history": [
+    {
+      "date": "2026-08-27T09:35:12+00:00",
+      "net_worth": -444717.63540568145,
+      "assets": 222702.36459431858,
+      "liabilities": 667420.0
+    }
+  ]
+}
