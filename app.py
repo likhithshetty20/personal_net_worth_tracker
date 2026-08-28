@@ -4,12 +4,20 @@ import json
 import uuid
 from datetime import datetime
 import requests
+import re
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = Flask(__name__)
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_FILE = os.path.join(BASE_DIR, "data.json")
 SETTINGS_FILE = os.path.join(BASE_DIR, "settings.json")
+
+MANUAL_MARKET_PRICES = {
+    "TATAGOLD": 15.31
+}
 
 DEFAULT_DATA = {
     "assets": {
@@ -65,6 +73,40 @@ def load_json(path, default):
     except Exception:
         return json.loads(json.dumps(default))
 
+
+MARKET_CACHE_FILE = os.path.join(
+    BASE_DIR,
+    "market_cache.json"
+)
+
+
+def load_market_cache():
+    return load_json(
+        MARKET_CACHE_FILE,
+        {}
+    )
+
+
+def save_market_cache(cache):
+    try:
+        with open(
+            MARKET_CACHE_FILE,
+            "w",
+            encoding="utf-8"
+        ) as file:
+
+            json.dump(
+                cache,
+                file,
+                indent=2
+            )
+
+    except Exception as error:
+
+        print(
+            "Market cache save error:",
+            error
+        )
 
 def load_data():
     data = load_json(DATA_FILE, DEFAULT_DATA)
@@ -249,6 +291,41 @@ def get_yahoo_price(symbol):
 
         return None
 
+def get_google_finance_price(symbol):
+    try:
+        url = (
+            f"https://www.google.com/finance/quote/"
+            f"{symbol}:NSE?hl=en"
+        )
+
+        response = requests.get(
+            url,
+            headers={
+                "User-Agent": "Mozilla/5.0"
+            },
+            timeout=15
+        )
+
+        response.raise_for_status()
+
+        match = re.search(
+             r'class="YMlKec[^"]*"[^>]*>₹([\d,]+(?:\.\d+)?)',
+             response.text
+            )
+        if match:
+            return number(
+                match.group(1).replace(",", "")
+            )
+
+    except Exception as error:
+        print(
+            "Google Finance price error:",
+            symbol,
+            error
+        )
+
+    return None
+
 
 # ============================================================
 # TWELVE DATA
@@ -345,6 +422,12 @@ def get_market_data():
 
     data = load_data()
     settings = load_settings()
+    cache = load_market_cache()
+
+    bharatstock_api_key = os.getenv(
+        "BHARATSTOCK_API_KEY",
+        ""
+    ).strip()
 
     market = {
 
@@ -402,73 +485,156 @@ def get_market_data():
                 coin_id
             ]
 
-    # --------------------------------------------------------
-    # INDIAN STOCKS
+        # --------------------------------------------------------
+    # INDIAN STOCKS - BHARATSTOCK
     # --------------------------------------------------------
 
-    for item in data[
-        "assets"
-    ][
-        "indian_stocks"
-    ]:
+    for item in data["assets"]["indian_stocks"]:
 
         symbol = str(
-            item.get(
-                "symbol",
-                ""
-            )
-        ).strip()
+            item.get("symbol", "")
+        ).strip().upper()
+
+        exchange = str(
+            item.get("exchange", "NSE")
+        ).strip().upper()
 
         if not symbol:
             continue
 
-        api_key = str(
-            settings.get(
-                "twelve_data_api_key",
-                ""
+        if symbol == "TATAGOLD":
+            market["prices"]["indian_stocks"][item["id"]] = {
+            "price": 15.31,
+            "currency": "INR",
+            "exchange": exchange,
+            "source": "Manual"
+           }
+            continue
+
+        if not bharatstock_api_key:
+            continue
+
+        try:
+
+            response = requests.get(
+                "https://bharatstockapi.com/v1/stocks/quotes",
+                params={
+                    "symbols": symbol
+                },
+                headers={
+                    "X-API-Key":
+                        bharatstock_api_key
+                },
+                timeout=15
             )
-        ).strip()
 
-        price = get_twelve_data_price(
-            symbol,
-            api_key
-        )
+            response.raise_for_status()
 
-        if not price:
+            result = response.json()
 
-            exchange = str(
-                item.get(
-                    "exchange",
-                    "NSE"
-                )
-            ).upper()
+            # BharatStock may return either a list
+            # or a dictionary containing quote data.
+            quote = None
 
-            yahoo_symbol = symbol
+            if isinstance(result, list):
 
-            if "." not in yahoo_symbol:
+                if result:
+                    quote = result[0]
 
-                if exchange == "BSE":
+            elif isinstance(result, dict):
 
-                    yahoo_symbol += ".BO"
+                if isinstance(
+                    result.get("data"),
+                    list
+                ):
+
+                    if result["data"]:
+                        quote = result["data"][0]
+
+                elif isinstance(
+                    result.get("data"),
+                    dict
+                ):
+
+                    quote = result["data"]
 
                 else:
 
-                    yahoo_symbol += ".NS"
+                    quote = result
 
-            price = get_yahoo_price(
-                yahoo_symbol
+            if quote:
+
+                current_price = (
+                    quote.get("close") or quote.get("close") or quote.get("price")
+                    or quote.get("last_price")
+                    or quote.get("ltp")
+                    or quote.get("lastPrice")
+                )
+
+                if current_price is None and symbol == "TATAGOLD":
+                    current_price = get_google_finance_price(symbol)
+
+                if current_price is not None:
+                    cached_price = number(current_price)
+
+                    market["prices"][
+                        "indian_stocks"
+                        ][
+                            item["id"]
+                            ] = {
+                                "price":
+                                    cached_price,
+                                "currency":
+                                    "INR",
+                                "exchange":
+                                    exchange,
+                                "source":
+                                    "BharatStock"
+                                }
+                    cache.setdefault(
+                        "indian_stocks",
+                        {}
+                    )
+                    cache["indian_stocks"][
+                        item["id"]
+                    ] = {
+                         "price":
+                             cached_price,
+
+                         "currency":
+                              "INR",
+
+                         "exchange":
+                             exchange,
+
+                         "source":
+                            "BharatStock",
+
+                         "symbol":
+                             symbol
+                        }
+
+                    save_market_cache(cache)
+
+        except Exception as error:
+            print(
+                "Indian stock price error:",
+                 symbol,
+                 error
             )
 
-        if price:
+            cached = (
+                cache
+                  .get("indian_stocks", {})
+                  .get(item["id"])
+            )
 
-            market[
-                "prices"
-            ][
-                "indian_stocks"
-            ][
-                item["id"]
-            ] = price
-
+            if cached:
+                market["prices"][
+                    "indian_stocks"
+                ][
+                    item["id"]
+                ] = cached
     # --------------------------------------------------------
     # US STOCKS
     # --------------------------------------------------------

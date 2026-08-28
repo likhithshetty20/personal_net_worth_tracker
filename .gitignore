@@ -3,6 +3,8 @@ __pycache__/
 *.pyc
 data.json
 settings.json
+market_cache.json
 .venv/
 __pycache__/
 *.pyc
+.env
